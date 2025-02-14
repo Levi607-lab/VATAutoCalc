@@ -17,6 +17,7 @@ def resource_path(relative_path):
 result_variable = ""
 current_input = ""
 is_running = False
+add_sub = False
 
 
 def input_converter(*args):
@@ -50,13 +51,24 @@ def calculate_vat():
     clipboard_content = clipboard_content.replace('€', '')
 
     if is_number(clipboard_content):
-        clipboard_value = float(clipboard_content)
-        result = clipboard_value / input_converter()
-        result_variable = "{:.2f}".format(result)
-        result_variable = result_variable.replace('.', ',')
-        pc.copy(result_variable)
-        print("The net amount is:", result_variable)
-        return result_variable
+
+        if add_sub == False:
+            clipboard_value = float(clipboard_content)
+            result = clipboard_value / input_converter()
+            result_variable = "{:.2f}".format(result)
+            result_variable = result_variable.replace('.', ',')
+            pc.copy(result_variable)
+            print("The net amount is:", result_variable)
+            return result_variable
+        else:
+            clipboard_value = float(clipboard_content)
+            result = clipboard_value * input_converter()
+            result_variable = "{:.2f}".format(result)
+            result_variable = result_variable.replace('.', ',')
+            pc.copy(result_variable)
+            print("The net amount is:", result_variable)
+            return result_variable
+
 
 
 def update_check():
@@ -77,12 +89,25 @@ def toggle():
     else:
         button_start_stop.config(text="Stop Auto Calculation")
         threading.Thread(target=update_check, daemon=True).start()
-          
+        
+
+def toggle_1():
+    global add_sub
+    add_sub = not add_sub
+
+    if not add_sub:
+        button_sub_add.config(text="VAT subtract")
+        add_sub = False
+    else:
+        button_sub_add.config(text="VAT add")
+        add_sub = True
+        
+
 
 # GUI Setup
 root = tk.Tk()
 entry_var = tk.StringVar()
-root.geometry("350x130+600+250")
+root.geometry("350x170+600+250")
 root.resizable(False, False)
 root.title("VAT Subtractor")
 
@@ -104,10 +129,15 @@ vat_output.grid(row=1, column=0, padx=5, pady=5, columnspan=3)
 # Row 2: Configuration
 root.grid_rowconfigure(2, weight=1)
 
-# Row 3: Start/Stop Button
-button_start_stop = tk.Button(root, anchor="s", text="Start Auto Calculation", command=toggle)
-button_start_stop.grid(row=2, column=0, padx=0, pady=0, columnspan=3)
+#Row 3: subtract/add
+button_sub_add = tk.Button(root, anchor="s", text="Subtract VAT", command=toggle_1)
+button_sub_add.grid(row=2, column=0, padx=0, pady=0, columnspan=3)
 
+
+# Row 4: Start/Stop Button
+button_start_stop = tk.Button(root, anchor="s", text="Start Auto Calculation", command=toggle)
+button_start_stop.grid(row=3, column=0, padx=0, pady=10, columnspan=3)
+ 
 # Set window icon
 root.iconphoto(False, tk.PhotoImage(file=resource_path("vat.png")))
 
